@@ -11,5 +11,5 @@ var solutions = Assembly
 
 foreach (var s in solutions)
 {
-    Console.WriteLine($"Day {s.Day()} Part 1: {s.Part1()} Part 2: {s.Part2()}");
+    Console.WriteLine($"Day {((BaseSolution)s!).Day()} Part 1: {s.Part1()} Part 2: {s.Part2()}");
 }

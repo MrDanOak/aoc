@@ -1,13 +1,13 @@
 namespace AdventOfCode2024.Solutions;
 
-public class Day1 : ISolution
+public class Day1 : BaseSolution, ISolution
 {
     private readonly List<int> _first = [];
     private readonly List<int> _second = [];
 
     public Day1()
     {
-        var parsed = File.ReadAllLines($"input/day{Day()}.txt")
+        var parsed = Lines
             .Select(l => l.Split(" ")
             .Where(x => string.IsNullOrWhiteSpace(x) is false)
             .Select(int.Parse)
@@ -27,5 +27,5 @@ public class Day1 : ISolution
 
     public object Part2() => _first.Select(x => x * _second.Count(y => y == x)).Sum();
 
-    public int Day() => 1;
+    public override int Day() => 1;
 }
