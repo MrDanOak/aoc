@@ -4,7 +4,7 @@ struct Lists {
 }
 
 fn lists() -> Lists {
-    let file  = include_str!("../inputs/day1.txt");
+    let file = include_str!("../inputs/day1.txt");
     let mut lines = file
         .split("\n")
         .collect::<Vec<&str>>();
@@ -13,8 +13,8 @@ fn lists() -> Lists {
 
     for l in lines.iter_mut() {
         let parts = l.split(" ").filter(|&x| !x.is_empty()).collect::<Vec<&str>>();
-        lists.first.push(parts[0].parse::<i32>().unwrap());
-        lists.second.push(parts[1].parse::<i32>().unwrap());
+        lists.first.push(parts[0].parse::<i32>().expect("Should be able to parse int"));
+        lists.second.push(parts[1].parse::<i32>().expect("Should be able to parse int"));
     }
 
     lists.first.sort();
