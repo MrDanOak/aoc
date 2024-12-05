@@ -1,11 +1,15 @@
 ﻿
 using System.Reflection;
+using AdventOfCode2024;
 using AdventOfCode2024.Solutions;
 
 var solutions = Assembly 
     .GetExecutingAssembly() 
     .GetTypes() 
-    .Where(x => typeof(ISolution).IsAssignableFrom(x) && !x.IsAbstract && x.GetConstructor(Type.EmptyTypes) != null) 
+    .Where(x => typeof(ISolution).IsAssignableFrom(x) && 
+                !x.IsAbstract && 
+                x.GetConstructor(Type.EmptyTypes) != null &&
+                x.IsDefined(typeof(RunSolutionAttribute), false)) 
     .Select(x => (ISolution)Activator.CreateInstance(x)) 
     .ToList();
 
