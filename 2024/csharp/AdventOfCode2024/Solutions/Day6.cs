@@ -130,13 +130,18 @@ public class Day6 : BaseSolution, ISolution
         var guard = new Guard(_guard.X, _guard.Y, _guard.Direction);
         var visited = GetPath(graph, guard).Nodes.Where(x => x.Visit is not null);
 
-        var tasks = visited.Select(n =>
+        var tasks = new List<Task<bool>>();
+        Parallel.ForEach(visited, n =>
         {
             var newGraph = new Graph(_graph.Select(x => (Node)x.Clone()).ToList());
             var changeNode = newGraph.Nodes.First(x => x.X == n.X && x.Y == n.Y);
             changeNode.Type = NodeType.Obstacle;
-            return PathIsInfiniteAsync(newGraph, new Guard(_guard.X, _guard.Y, _guard.Direction));
-        }).ToList();
+            var task = PathIsInfiniteAsync(newGraph, new Guard(_guard.X, _guard.Y, _guard.Direction));
+            lock (tasks)
+            {
+                tasks.Add(task);
+            }
+        });
 
         return Task.WhenAll(tasks).GetAwaiter().GetResult().Count(x => x is true);
     }
