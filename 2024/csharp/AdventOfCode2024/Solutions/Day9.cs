@@ -4,48 +4,8 @@ internal class Day9 : BaseSolution, ISolution
 {
     public override int Day() => 9;
 
-    public object Part1()
-    {
-        var disk = Lines.First();
-        var blocks = disk.Chunk(2)
-            .SelectMany((x, i) =>
-                Enumerable
-                .Range(0, x[0] - 48)
-                .Select(_ => (long?)i)
-                .Concat(
-                    Enumerable
-                    .Range(0, x.Length > 1 ? x[1] - 48 : 0)
-                    .Select(_ => (long?)null)
-                )
-            ).ToList();
-
-        var sortedBlocks = blocks.Select(x => x).ToList();
-        while (sortedBlocks.Any(x => x is null))
-        {
-            var firstNull = sortedBlocks.IndexOf(null);
-            var lastNotNull = sortedBlocks.FindLastIndex(x => x.HasValue);
-            if (firstNull <= 0 || lastNotNull <= 0) 
-                continue;
-
-            sortedBlocks[firstNull] = sortedBlocks[lastNotNull];
-            sortedBlocks.RemoveAt(lastNotNull);
-        }
-
-        var result = sortedBlocks.Select((x, i) =>
-            new
-            {
-                x.Value,
-                Index = i
-            })
-            .Aggregate((long)0, (acc, block) => acc + block.Value * block.Index);
-
-        return result;
-    }
-
-    public object Part2()
-    {
-        var disk = Lines.First();
-        var blocks = disk.Chunk(2)
+    private List<long?> GetBlocks() =>
+        Lines.First().Chunk(2)
             .SelectMany((x, i) =>
                 Enumerable
                     .Range(0, x[0] - 48)
@@ -57,8 +17,36 @@ internal class Day9 : BaseSolution, ISolution
                     )
             ).ToList();
 
-        var sortedBlocks = blocks.Select(x => x).ToList();
-        for (var i = blocks.Where(x => x is not null).Max(); i >= 0; i--)
+    private static long GetResult(IEnumerable<long?> sortedBlocks) =>
+        sortedBlocks.Select((x, i) =>
+                new
+                {
+                    Value = x ?? 0,
+                    Index = i
+                })
+            .Aggregate((long)0, (acc, block) => acc + block.Value * block.Index);
+
+    public object Part1()
+    {
+        var sortedBlocks = GetBlocks().ToList();
+        while (sortedBlocks.Any(x => x is null))
+        {
+            var firstNull = sortedBlocks.IndexOf(null);
+            var lastNotNull = sortedBlocks.FindLastIndex(x => x.HasValue);
+            if (firstNull <= 0 || lastNotNull <= 0) 
+                continue;
+
+            sortedBlocks[firstNull] = sortedBlocks[lastNotNull];
+            sortedBlocks.RemoveAt(lastNotNull);
+        }
+
+        return GetResult(sortedBlocks);
+    }
+
+    public object Part2()
+    {
+        var sortedBlocks = GetBlocks();
+        for (var i = sortedBlocks.Where(x => x is not null).Max(); i >= 0; i--)
         {
             var toBeMoved = GetContiguous(i, sortedBlocks).First().ToList();
             var moveLocation = GetContiguous(null, sortedBlocks)
@@ -75,15 +63,7 @@ internal class Day9 : BaseSolution, ISolution
             }
         }
 
-        var result = sortedBlocks.Select((x, i) =>
-                new
-                {
-                    Value = x ?? 0,
-                    Index = i
-                })
-            .Aggregate((long)0, (acc, block) => acc + block.Value * block.Index);
-
-        return result;
+        return GetResult(sortedBlocks);
 
         IEnumerable<IEnumerable<(long?, int)>> GetContiguous(long? value, List<long?> list)
         {
