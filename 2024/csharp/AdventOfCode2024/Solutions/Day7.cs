@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 
 namespace AdventOfCode2024.Solutions;
 
-[RunSolution]
 public partial class Day7 : BaseSolution, ISolution
 {
     private enum OperationType
