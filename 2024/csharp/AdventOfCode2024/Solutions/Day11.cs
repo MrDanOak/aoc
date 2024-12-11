@@ -1,48 +1,57 @@
-using System.Collections.Concurrent;
-
 namespace AdventOfCode2024.Solutions;
-
 [RunSolution]
 public class Day11 : BaseSolution, ISolution
 {
     public override int Day() => 11;
 
+    private static Dictionary<(long, int, int), long> _cache = new();
+
+    private static long _total = 0;
+
     private long Stones(int blinks)
     {
-        var stones = Lines
+        var total = Lines
             .First()
             .Split(' ')
             .Select(long.Parse)
-            .ToList();
-        
-        for (var i = 0; i < blinks; i++)
-        {
-            Console.WriteLine($"Blink {i}");
-            var newStones = new List<long>();
-            for (var j = 0; j < stones.Count; j++)
-            {
-                newStones.AddRange(ProcessStone(stones[j]));
-            }
+            .ToList()
+            .Sum(stone => RecursiveScore(stone, 0, blinks));
 
-            stones = newStones;
-        }
-        Console.WriteLine($"Blinks {blinks} stones {stones.Count}");
-        return stones.Count;
+        Console.WriteLine($"Blinks {blinks} stones {total}");
+        return total;
     }
 
-    static IEnumerable<long> ProcessStone(long stone)
+    static long RecursiveScore(long stone, int blink, int targetBlink, long currentTotal = 0)
     {
-        if (stone == 0)
+        if (blink == targetBlink)
         {
-            return [1];
+            currentTotal += 1;
+            return currentTotal;
+        }
+
+        if (_cache.TryGetValue((stone, blink, targetBlink), out var cachedValue))
+            return cachedValue;
+
+        if (stone == 0) {
+            currentTotal += RecursiveScore(1, blink + 1, targetBlink, currentTotal);
+            _cache.TryAdd((stone, blink, targetBlink), currentTotal);
+            return currentTotal;
         }
 
         var asString = stone.ToString();
         if (asString.Length % 2 != 0) 
-            return [stone * 2024];
-        
+        {
+            currentTotal += RecursiveScore(stone * 2024, blink + 1, targetBlink, currentTotal);
+            _cache.TryAdd((stone, blink, targetBlink), currentTotal);
+            return currentTotal;
+        }
+
         var halfLength = asString.Length / 2;
-        return [long.Parse(asString[..halfLength]), long.Parse(asString[halfLength..])];
+        currentTotal += RecursiveScore(long.Parse(asString[..halfLength]), blink + 1, targetBlink, currentTotal) +
+            RecursiveScore(long.Parse(asString[halfLength..]), blink + 1, targetBlink, currentTotal);
+
+        _cache.TryAdd((stone, blink, targetBlink), currentTotal);
+        return currentTotal;
     }
 
     public object Part1() => Stones(25);
