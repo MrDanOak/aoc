@@ -1,6 +1,5 @@
 namespace AdventOfCode2024.Solutions;
 
-[RunSolution]
 public class Day10 : BaseSolution, ISolution
 {
     public override int Day() => 10;
